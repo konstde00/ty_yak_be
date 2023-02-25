@@ -1,0 +1,25 @@
+databaseChangeLog:
+  -  preConditions:
+
+  - changeSet:
+      id: subscriptionsAddForeignKeyOnUserIds
+      author: konstde00
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: requester_id
+            baseTableName: subscriptions
+            constraintName: subscriptions_requester_FK
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: addressee_id
+            baseTableName: subscriptions
+            constraintName: subscriptions_addressee_FK
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true

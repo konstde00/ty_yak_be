@@ -1,0 +1,16 @@
+databaseChangeLog:
+  -  preConditions:
+
+  - changeSet:
+      id: groupsAddForeignKeyOnCreatorId
+      author: konstde00
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: creator_id
+            baseTableName: groups
+            constraintName: groups_users_FK
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true

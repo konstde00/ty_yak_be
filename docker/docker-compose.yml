@@ -1,0 +1,22 @@
+version: '3.3'
+
+services:
+  app:
+    image: 553440882962.dkr.ecr.eu-central-1.amazonaws.com/ty-yak-be-staging
+    environment:
+      - _JAVA_OPTIONS=-Xmx512m -Xms256m
+      - SPRING_PROFILES_ACTIVE=dev,api-docs
+    ports:
+      - "80:8080"
+  postgresql:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=ty_yak_be
+      - POSTGRES_PASSWORD=very_very_secure_password
+      - POSTGRES_DB=ty_yak_be
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - "5432:5432"
+

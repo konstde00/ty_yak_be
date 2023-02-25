@@ -1,0 +1,16 @@
+databaseChangeLog:
+  -  preConditions:
+
+  - changeSet:
+      id: refreshTokensAddForeignKeyOnUserId
+      author: konstde00
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: refresh_tokens
+            constraintName: refresh_tokens_users_FK
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true

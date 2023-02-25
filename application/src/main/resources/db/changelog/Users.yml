@@ -1,0 +1,58 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: createUsersTable
+      author: konstde00
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  constraints:
+                      primaryKey: true
+                      nullable: false
+              - column:
+                  name: name
+                  type: varchar
+              - column:
+                  name: username
+                  type: varchar
+              - column:
+                  name: password
+                  type: varchar
+              - column:
+                  name: avatar_url
+                  type: varchar
+              - column:
+                  name: email
+                  type: varchar
+              - column:
+                  name: city
+                  type: varchar
+              - column:
+                  name: push_notifications_enabled
+                  type: boolean
+              - column:
+                  name: registration_type
+                  type: varchar
+              - column:
+                  name: native_country_code
+                  type: varchar
+              - column:
+                  name: created_at
+                  type: timestamp
+              - column:
+                  name: modified_at
+                  type: timestamp
+            tableName: users
+
+  - changeSet:
+      id: createUsersIdSequence
+      author: konstde00
+      changes:
+        - createSequence:
+            type: bigint
+            minValue: 1
+            incrementBy: 1
+            sequenceName: users_id_seq

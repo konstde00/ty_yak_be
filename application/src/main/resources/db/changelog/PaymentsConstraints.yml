@@ -1,0 +1,16 @@
+databaseChangeLog:
+  -  preConditions:
+
+  - changeSet:
+      id: paymentsAddForeignKeyOnUserId
+      author: konstde00
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: payments
+            constraintName: payments_users_FK
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true

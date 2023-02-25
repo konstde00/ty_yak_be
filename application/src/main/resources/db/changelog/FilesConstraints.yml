@@ -1,0 +1,16 @@
+databaseChangeLog:
+  -  preConditions:
+
+  - changeSet:
+      id: filesAddForeignKeyOnOwnerId
+      author: konstde00
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: owner_id
+            baseTableName: files
+            constraintName: files_users_FK
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true
