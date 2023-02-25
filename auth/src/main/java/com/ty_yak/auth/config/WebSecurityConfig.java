@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
+import static com.google.api.client.http.HttpMethods.*;
 import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -31,7 +32,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         response.sendError(SC_FORBIDDEN, "You're not authorized to perform such action."))
                 .and()
                 .authorizeRequests()
-                .antMatchers("/**").permitAll()
+                // UserController
+                .antMatchers(POST, "/api/users/v1/registration/**").permitAll()
+                .antMatchers(POST, "api/users/v1/check/username").permitAll()
+                .antMatchers(PUT, "api/users/v1/password/recovery").hasRole("USER")
+                .antMatchers(POST, "api/users/v1/password-code/confirm").hasRole("USER")
+                .antMatchers(POST, "api/users/v1/email-code/generate").hasRole("USER")
+                .antMatchers(POST, "api/users/v1/email-code/confirm").hasRole("USER")
+                .antMatchers(GET, "api/users/v1/info").hasRole("USER")
+                .antMatchers(POST, "api/users/v1/avatar").hasRole("USER")
+                .antMatchers(PUT, "api/users/v1/device-token").hasRole("USER")
+                .antMatchers(PUT, "api/users/v1/device-token/reset").hasRole("USER")
+                .antMatchers(DELETE, "api/users/v1").hasRole("USER")
+                // LoginController
+                .antMatchers(POST, "/api/v1/login/**").permitAll()
+                .antMatchers(POST, "/api/v1/token/refresh").hasRole("USER")
+                .antMatchers(POST, "/api/v1/code/generate").hasRole("USER")
+                .antMatchers(POST, "/api/v1/logout").hasRole("USER")
+
                 .anyRequest()
                 .authenticated()
                 .and()

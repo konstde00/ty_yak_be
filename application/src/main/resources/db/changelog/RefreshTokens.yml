@@ -30,3 +30,13 @@ databaseChangeLog:
                     name: expired_at
                     type: timestamp
               tableName: refresh_tokens
+
+  - changeSet:
+      id: createRefreshTokensIdSequence
+      author: konstde00
+      changes:
+        - createSequence:
+            type: bigint
+            minValue: 1
+            incrementBy: 1
+            sequenceName: refresh_tokens_id_seq

@@ -2,13 +2,13 @@ databaseChangeLog:
   -  preConditions:
 
   - changeSet:
-      id: usersRolesAddForeignKeyOnUserId
+      id: invitationsAddForeignKeyOnUserId
       author: konstde00
       changes:
         - addForeignKeyConstraint:
             baseColumnNames: user_id
-            baseTableName: users_invitations
-            constraintName: users_invitations_users_FK
+            baseTableName: invitations
+            constraintName: invitations_users_FK
             onDelete: CASCADE
             onUpdate: CASCADE
             referencedColumnNames: id

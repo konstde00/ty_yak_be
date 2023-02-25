@@ -1,5 +1,6 @@
 package com.ty_yak.auth.repository;
 
+import com.ty_yak.auth.model.entity.ConfirmationCode;
 import com.ty_yak.auth.model.entity.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,12 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @EntityGraph(attributePaths = {"roles"})
     Optional<User> findByEmail(String email);
-
-    @Query("select cc.user from ConfirmationCode cc " +
-            "where cc.user.id =:userId " +
-            "and cc.code =:code")
-    @EntityGraph(attributePaths = {"roles"})
-    Optional<User> findByIdAndConfirmationCode(Long userId, int code);
 
     @Modifying
     @Query("delete from User u " +

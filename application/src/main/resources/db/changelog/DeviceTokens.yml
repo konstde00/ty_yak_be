@@ -27,3 +27,14 @@ databaseChangeLog:
                     name: created_at
                     type: timestamp
               tableName: device_tokens
+
+
+  - changeSet:
+      id: createDeviceTokensIdSequence
+      author: konstde00
+      changes:
+        - createSequence:
+            type: bigint
+            minValue: 1
+            incrementBy: 1
+            sequenceName: device_tokens_id_seq

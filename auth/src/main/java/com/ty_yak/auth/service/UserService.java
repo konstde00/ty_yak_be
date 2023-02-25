@@ -1,6 +1,8 @@
 package com.ty_yak.auth.service;
 
+import com.sendgrid.Method;
 import com.sendgrid.Request;
+import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
@@ -124,7 +126,7 @@ public class UserService {
                 registrationDto.getUsername(), EMAIL_AND_PASSWORD);
 
         sendMailWithPasswordToUserEmail(registrationDto.getEmail(),
-                password);
+                password, user.getId());
 
         var jwtDto = generateTokens(user);
 
@@ -240,7 +242,6 @@ public class UserService {
         var hashedPassword = bcryptPassword(changePasswordDto.getNewPassword());
 
         user.setPassword(hashedPassword);
-        user.setCodeExpiredTime(null);
 
         var refreshToken = tokenService.generateRefreshToken(user);
         var jwtDto = tokenService.getAccessAndRefreshTokens(user, refreshToken);
@@ -267,17 +268,18 @@ public class UserService {
         userRepository.deleteUserById(user.getId());
     }
 
-    public void sendMailWithPasswordToUserEmail(String email, String password) throws IOException {
+    public void sendMailWithPasswordToUserEmail(String email, String password, long userId) throws IOException {
 
-        log.debug("'sendMailWithPasswordToUserEmail' invoked with email - {}", email);
+        log.info("'sendMailWithPasswordToUserEmail' invoked with email - {}", email);
 
         var mail = generateInfo(email, password);
         var request = generateRequest(mail);
         var response = sendGrid.api(request);
 
-        var sendGridResponseDto = userMapper.toSendGridResponse(response, null);
+        var sendGridResponseDto = userMapper
+                .toSendGridResponse(response, userId);
 
-        log.debug("'sendMailWithPasswordToUserEmail' returned - {}", sendGridResponseDto);
+        log.info("'sendMailWithPasswordToUserEmail' returned - {}", sendGridResponseDto);
     }
 
     public Mail generateInfo(String email, String password) {
@@ -330,16 +332,16 @@ public class UserService {
 
         log.info("'validateAndGetUserForChangePassword' invoked for user with id - {}", userId);
 
-        var user = userRepository.findByIdAndConfirmationCode(userId, code)
+        var confirmationCode = confirmationCodeRepository.findByIdAndConfirmationCode(userId, code)
                 .orElseThrow(() -> {
                     var message = "User with such id and code is not found.";
                     log.warn(message);
                     return new ResourceNotFoundException(message);
                 });
 
-        log.info("'validateAndGetUserForChangePassword' returned - {}", user);
+        log.info("'validateAndGetUserForChangePassword' returned - {}", confirmationCode);
 
-        return user;
+        return confirmationCode.getUser();
     }
 
     @SneakyThrows
@@ -411,13 +413,13 @@ public class UserService {
 
         log.info("'confirmPasswordCode' invoked");
 
-        var user = userRepository.findByIdAndConfirmationCode(confirmPasswordCodeDto.getUserId(), confirmPasswordCodeDto.getCode())
+        var confirmationCode = confirmationCodeRepository.findByIdAndConfirmationCode(confirmPasswordCodeDto.getUserId(), confirmPasswordCodeDto.getCode())
                 .orElseThrow(() -> {
                     log.error("Wrong code.");
                     return new ResourceNotFoundException(INCORRECT_CONFIRM_CODE.name());
                 });
 
-        if (user.getCodeExpiredTime().isBefore(DateUtil.getLocalDateTimeNow())) {
+        if (confirmationCode.getExpiredAt().isBefore(DateUtil.getLocalDateTimeNow())) {
             log.error("Your code has expired.");
             throw new ExpiredException(CODE_EXPIRED.name());
         }

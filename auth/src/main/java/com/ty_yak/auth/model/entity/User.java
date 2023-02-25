@@ -72,9 +72,6 @@ public class User {
     @OneToMany(mappedBy = "user")
     Collection<ConfirmationCode> confirmationCodes = new ArrayList<>();
 
-    @Column(name = "code_expired_time")
-    LocalDateTime codeExpiredTime;
-
     @Column(name = "native_country_code")
     @Enumerated(STRING)
     CountryCode nativeCountryCode;

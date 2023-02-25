@@ -26,7 +26,7 @@ import javax.validation.Valid;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/user")
+@RequestMapping("/api/users")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
 
@@ -84,7 +84,7 @@ public class UserController {
         return jwtDto;
     }
 
-    @PostMapping("/code/confirm")
+    @PostMapping("/v1/password-code/confirm")
     @Operation(summary = "Confirm change password code")
     public boolean confirmChangePasswordCode(@RequestBody @Valid ConfirmChangePasswordCodeDto confirmCodeDto) {
 
@@ -97,7 +97,7 @@ public class UserController {
         return confirmation;
     }
 
-    @PostMapping("/v1/code/generate")
+    @PostMapping("/v1/email-code/generate")
     @Operation(summary = "Send confirmation code to email")
     public SendGridResponseDto createConfirmationCode(@RequestBody @Valid ConfirmationCodeDto confirmationCodeDto) {
 
@@ -110,7 +110,7 @@ public class UserController {
         return sendGridResponse;
     }
 
-    @PostMapping("/v1/code/confirm")
+    @PostMapping("/v1/email-code/confirm")
     @Operation(summary = "Confirm email confirmation code")
     public boolean confirmEmailCode(@RequestBody @Valid ConfirmationCodeDto confirmCodeDto) {
 
@@ -124,7 +124,7 @@ public class UserController {
         return confirmation;
     }
 
-    @GetMapping
+    @GetMapping("/v1/info")
     @Operation(summary = "Get user info")
     public UserDto getInfo(@AuthenticationPrincipal Long userId) {
 
@@ -164,7 +164,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
-    @PutMapping("/v1/deviceToken")
+    @PutMapping("/v1/device-token")
     @Operation(summary = "Change device token")
     public ResponseEntity<String> changeUserDeviceToken(@AuthenticationPrincipal Long userId,
                                                         @RequestBody DeviceTokenDto deviceToken) {
@@ -178,7 +178,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
-    @PutMapping("/v1/deviceToken/reset")
+    @PutMapping("/v1/device-token/reset")
     @Operation(summary = "Set device token to null")
     public ResponseEntity<?> resetDeviceToken(@AuthenticationPrincipal Long userId) {
 

@@ -78,19 +78,6 @@ public class LoginController {
         return sendGridResponse;
     }
 
-    @PostMapping("/v1/code/confirm")
-    @Operation(summary = "Confirm email confirmation code")
-    public boolean confirmEmailCode(@RequestBody @Valid ConfirmationCodeDto confirmCodeDto) {
-
-        log.info("User tries to confirm email code.");
-
-        var confirmation = loginService.confirmEmailCode(confirmCodeDto);
-
-        log.info("User confirmed code with - {}", confirmation);
-
-        return confirmation;
-    }
-
     @PostMapping("/v1/logout")
     @Operation(summary = "User logout")
     public void logout(@AuthenticationPrincipal Long userId,
