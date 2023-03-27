@@ -1,0 +1,65 @@
+stages:
+  - approve
+  - build
+  - deploy
+
+# Staging
+approve build staging:
+  stage: approve
+  script:
+    - echo "Approve deployment dev"
+  rules:
+    - when : manual
+
+build staging stage:
+  image: docker:20.10-dind
+  services:
+    - docker:20.10-dind
+  stage: build
+  before_script:
+    - apk add maven
+    - apk add --no-cache bash build-base ca-certificates curl gettext git libffi-dev linux-headers make musl-dev openldap-dev openssh-client python3 py-pip python3-dev rsync tzdata && pip3 install --upgrade pip && pip3 install awscli boto3
+  script:
+    - mvn clean install
+    - cd auth
+    - mvn clean install
+    - cd ../
+    - mvn clean package -DskipTests=true --file application/pom.xml
+    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+    - docker build --pull -t "$ECR_REPOSITORY-$CI_COMMIT_REF_SLUG" .
+    - docker push "$ECR_REPOSITORY-$CI_COMMIT_REF_SLUG"
+  only:
+    - staging
+    - merge_requests
+  tags:
+    - docker
+  cache:
+    paths:
+      - .m2/repository
+  variables:
+    MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+
+Deploy Stage:
+  stage: deploy
+  image: ubuntu:20.04
+  before_script:
+    - apt-get update -qq
+    - apt-get install -qq git
+
+    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ssh $USER@$HOST "sudo docker-compose -f /opt/ty-yak-be/docker-compose.yml down"
+    - ssh $USER@$HOST "aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 553440882962.dkr.ecr.eu-central-1.amazonaws.com"
+    - ssh $USER@$HOST "docker pull 553440882962.dkr.ecr.eu-central-1.amazonaws.com/ty-yak-be-staging:latest"
+    - ssh $USER@$HOST "sudo docker-compose -f /opt/ty-yak-be/docker-compose.yml up -d --build"
+  only:
+    - staging
+    - merge_requests
+
+# Prod
+
+

@@ -1,0 +1,45 @@
+databaseChangeLog:
+  -  preConditions:
+
+  -  changeSet:
+       id:  createUsersStatusesTable
+       author:  konstde00
+       changes:
+         -  createTable:
+              columns:
+                - column:
+                    name: id
+                    type: bigint
+                    constraints:
+                      primaryKey: true
+                      nullable: false
+                - column:
+                    name: user_id
+                    type: bigint
+                    constraints:
+                      nullable: false
+                - column:
+                    name: status_id
+                    type: bigint
+                    constraints:
+                      nullable: false
+                - column:
+                    name: message
+                    type: varchar
+                - column:
+                    name: group_id
+                    type: bigint
+                - column:
+                    name: created_at
+                    type: timestamp
+              tableName: users_statuses
+
+  - changeSet:
+      id: createUsersStatusesIdSequence
+      author: konstde00
+      changes:
+        - createSequence:
+            type: bigint
+            minValue: 1
+            incrementBy: 1
+            sequenceName: users_statuses_id_seq

@@ -1,0 +1,42 @@
+databaseChangeLog:
+  -  preConditions:
+
+  -  changeSet:
+       id:  createUsersCodesTable
+       author:  konstde00
+       changes:
+         -  createTable:
+              columns:
+                - column:
+                    name: id
+                    type: bigint
+                    constraints:
+                      primaryKey: true
+                      nullable: false
+                - column:
+                    name: user_id
+                    type: bigint
+                    constraints:
+                      nullable: false
+                - column:
+                    name: code
+                    type: int
+                    constraints:
+                      nullable: false
+                - column:
+                    name: created_at
+                    type: timestamp
+                - column:
+                    name: expired_at
+                    type: timestamp
+              tableName: confirmation_codes
+
+  - changeSet:
+      id: createConfirmationCodesIdSequence
+      author: konstde00
+      changes:
+        - createSequence:
+            type: bigint
+            minValue: 1
+            incrementBy: 1
+            sequenceName: confirmation_codes_id_seq

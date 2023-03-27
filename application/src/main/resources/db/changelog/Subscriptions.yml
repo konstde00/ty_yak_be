@@ -1,0 +1,39 @@
+databaseChangeLog:
+  -  preConditions:
+
+  -  changeSet:
+       id:  createSubscriptionsTable
+       author:  konstde00
+       changes:
+         -  createTable:
+              columns:
+                - column:
+                    name: id
+                    type: bigint
+                    constraints:
+                      primaryKey: true
+                      nullable: false
+                - column:
+                    name: requester_id
+                    type: bigint
+                    constraints:
+                      nullable: false
+                - column:
+                    name: addressee_id
+                    type: bigint
+                    constraints:
+                      nullable: false
+                - column:
+                    name: created_at
+                    type: timestamp
+              tableName: subscriptions
+
+  - changeSet:
+      id: createSubscriptionsIdSequence
+      author: konstde00
+      changes:
+        - createSequence:
+            type: bigint
+            minValue: 1
+            incrementBy: 1
+            sequenceName: subscriptions_id_seq

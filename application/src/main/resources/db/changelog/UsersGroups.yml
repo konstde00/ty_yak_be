@@ -1,0 +1,50 @@
+databaseChangeLog:
+  -  preConditions:
+
+  -  changeSet:
+       id:  createUsersGroupsTable
+       author:  konstde00
+       changes:
+         -  createTable:
+              columns:
+                - column:
+                    name: id
+                    type: bigint
+                    constraints:
+                      primaryKey: true
+                      nullable: false
+                - column:
+                    name: group_id
+                    type: bigint
+                    constraints:
+                      nullable: false
+                - column:
+                    name: user_id
+                    type: bigint
+                    constraints:
+                      nullable: false
+                - column:
+                    name: created_at
+                    type: timestamp
+              tableName: users_groups
+
+  - changeSet:
+      id: createUsersGroupsIdSequence
+      author: konstde00
+      changes:
+        - createSequence:
+            type: bigint
+            minValue: 1
+            incrementBy: 1
+            sequenceName: users_groups_id_seq
+
+  - changeSet:
+      id: addDefaultValueToId
+      author: konstde00
+      changes:
+        - addDefaultValue:
+            columnDataType: bigint
+            columnName: id
+            defaultValueSequenceNext: users_groups_id_seq
+            schemaName: public
+            tableName: users_groups

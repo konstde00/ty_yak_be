@@ -1,0 +1,31 @@
+databaseChangeLog:
+  -  preConditions:
+
+
+  - changeSet:
+      id: userStatusesAddForeignKeyOnUserId
+      author: konstde00
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: users_statuses
+            constraintName: users_statuses_users_FK
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true
+
+  - changeSet:
+      id: userStatusesAddForeignKeyOnStatusId
+      author: konstde00
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: status_id
+            baseTableName: users_statuses
+            constraintName: users_statuses_statuses_FK
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: statuses
+            validate: true

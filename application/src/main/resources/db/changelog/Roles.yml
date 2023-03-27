@@ -1,0 +1,30 @@
+databaseChangeLog:
+  -  preConditions:
+
+  -  changeSet:
+       id:  createUserRolesTable
+       author:  konstde00
+       changes:
+         -  createTable:
+              columns:
+                - column:
+                    name: user_id
+                    type: bigint
+                    constraints:
+                      nullable: false
+                - column:
+                    name: role
+                    type: varchar
+                    constraints:
+                      nullable: false
+              tableName: roles
+
+  - changeSet:
+      id: createRolesIdSequence
+      author: konstde00
+      changes:
+        - createSequence:
+            type: bigint
+            minValue: 1
+            incrementBy: 1
+            sequenceName: roles_id_seq

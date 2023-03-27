@@ -1,0 +1,14 @@
+databaseChangeLog:
+  -  preConditions:
+
+  - changeSet:
+      id: createUserIdNotNullConstraint
+      author: konstde00
+      changes:
+        - addNotNullConstraint:
+            columnDataType: bigint
+            columnName: id
+            constraintName: users_id_not_null_constraint
+            defaultNullValue: 0
+            tableName: users
+            validate: true

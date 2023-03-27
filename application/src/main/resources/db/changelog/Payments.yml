@@ -1,0 +1,48 @@
+databaseChangeLog:
+  -  preConditions:
+
+  -  changeSet:
+       id:  createPaymentsTable
+       author:  konstde00
+       changes:
+         -  createTable:
+              columns:
+                - column:
+                    name: id
+                    type: bigint
+                    constraints:
+                      primaryKey: true
+                      nullable: false
+                - column:
+                    name: user_id
+                    type: bigint
+                    constraints:
+                      nullable: false
+                - column:
+                    name: payment_timestamp
+                    type: timestamp
+                    constraints:
+                      nullable: false
+                - column:
+                    name: type
+                    type: varchar
+                - column:
+                    name: amount
+                    type: numeric
+                - column:
+                    name: status
+                    type: varchar
+                - column:
+                    name: error_message
+                    type: varchar
+              tableName: payments
+
+  - changeSet:
+      id: createPaymentsIdSequence
+      author: konstde00
+      changes:
+        - createSequence:
+            type: bigint
+            minValue: 1
+            incrementBy: 1
+            sequenceName: payments_id_seq
