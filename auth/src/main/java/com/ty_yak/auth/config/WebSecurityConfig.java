@@ -52,6 +52,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(POST, "api/users/v1/avatar").hasRole("USER")
                 .antMatchers(PUT, "api/users/v1/device-token").hasRole("USER")
                 .antMatchers(PUT, "api/users/v1/device-token/reset").hasRole("USER")
+                .antMatchers( "/api/users/v1/upload").permitAll()
                 .antMatchers(DELETE, "api/users/v1").hasRole("USER")
                 // LoginController
                 .antMatchers(POST, "/api/v1/login/**").permitAll()

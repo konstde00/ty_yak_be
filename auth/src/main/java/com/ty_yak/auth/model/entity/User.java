@@ -1,5 +1,6 @@
 package com.ty_yak.auth.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ty_yak.auth.model.enums.CountryCode;
 import com.ty_yak.auth.model.enums.Role;
 import com.ty_yak.auth.model.enums.UserRegistrationType;
@@ -30,6 +31,7 @@ import static lombok.AccessLevel.PRIVATE;
 @AllArgsConstructor
 @Table(name = "users")
 @Accessors(chain = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = PRIVATE)
 public class User {
 
@@ -67,10 +69,10 @@ public class User {
     Collection<Role> roles = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    Collection<DeviceToken> deviceTokens = new ArrayList<>();
+    Collection<DeviceToken> deviceTokens;
 
     @OneToMany(mappedBy = "user")
-    Collection<ConfirmationCode> confirmationCodes = new ArrayList<>();
+    Collection<ConfirmationCode> confirmationCodes;
 
     @Column(name = "native_country_code")
     @Enumerated(STRING)
@@ -83,4 +85,11 @@ public class User {
     @UpdateTimestamp
     @Column(name = "modified_at")
     LocalDateTime updatedAt;
+
+    public User(String username, String email, String password, String city) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.city = city;
+    }
 }

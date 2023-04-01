@@ -7,12 +7,15 @@ import com.ty_yak.auth.model.dto.registration.RegistrationByGoogleDto;
 import com.ty_yak.auth.model.dto.user.*;
 import com.ty_yak.auth.model.dto.login.JwtDto;
 import com.ty_yak.auth.model.dto.registration.RegistrationByEmailDto;
+import com.ty_yak.auth.model.entity.User;
+import com.ty_yak.auth.service.FileService;
 import com.ty_yak.auth.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +25,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -30,6 +36,7 @@ import javax.validation.Valid;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
 
+    FileService fileService;
     UserService userService;
 
     @PostMapping("/v1/check/username")
@@ -189,6 +196,19 @@ public class UserController {
         log.debug("Successfully set device token to null");
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @PostMapping("/v1/upload")
+    @Operation(summary = "Upload file")
+    public ResponseEntity<List<User>> uploadFile(@RequestParam("file") MultipartFile file) throws IOException, Docx4JException {
+
+        log.info("Upload has been requested");
+
+        var result = fileService.readUsers(file);
+
+        log.info("Upload has been completed successfully");
+
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/v1")
