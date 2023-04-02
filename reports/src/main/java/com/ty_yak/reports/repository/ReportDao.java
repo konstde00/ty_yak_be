@@ -30,7 +30,7 @@ public class ReportDao {
                 from users u
                 join users_statuses us on u.id = us.user_id
                 group by u.id
-                order by messages_sent desc    
+                order by messages_sent desc, u.email desc    
                 limit 10
                 
                 """;

@@ -28,13 +28,14 @@ public class ExcelReader extends FileReader {
         for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
             Row row = sheet.getRow(i);
 
-//            checkUserRowFormat(row);
+            checkUserRowFormat(row);
 
             String username = getStringCellValueIfPossible(row, 0,
                     "Username");
 
             String email = getStringCellValueIfPossible(row, 1,
                     "Email");
+            checkEmailFormat(email, row.getRowNum());
 
             String password = getStringCellValueIfPossible(row, 2,
                     "Password");
@@ -87,5 +88,22 @@ public class ExcelReader extends FileReader {
                 variableName.substring(1) +
                 " in row " +
                 rowNumber;
+    }
+
+    private void checkUserRowFormat(Row row) {
+        if (row.getPhysicalNumberOfCells() != 4) {
+            throw new NotValidException("Incorrect number of columns in row " + (row.getRowNum() + 1));
+        }
+        for (int i = 0; i < 4; i++) {
+            if (row.getCell(i) == null || row.getCell(i).getStringCellValue() == null || row.getCell(i).getStringCellValue().trim().isEmpty()) {
+                throw new NotValidException(String.format("Missed value in cell %s in row %s", i + 1, (row.getRowNum() + 1)));
+            }
+        }
+    }
+
+    private void checkEmailFormat(String email, Integer rowNumber) {
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new NotValidException("Incorrect email format in row " + rowNumber);
+        }
     }
 }

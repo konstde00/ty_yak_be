@@ -67,10 +67,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
                 return new UsernamePasswordAuthenticationToken(userId, null, authorities);
 
-            } catch (Exception e) {
-
-                log.error("Token is not valid");
-            }
+            } catch (Exception ignored) {}
         }
 
         return null;

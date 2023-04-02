@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,12 +17,20 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FileService {
 
     S3Service s3Service;
+    UserService userService;
     Map<String, FileReader> readers;
+
+    public FileService(S3Service s3Service,
+                       @Lazy UserService userService,
+                       Map<String, FileReader> readers) {
+        this.s3Service = s3Service;
+        this.userService = userService;
+        this.readers = readers;
+    }
 
     public List<User> readUsers(MultipartFile file) throws IOException, Docx4JException {
 
@@ -33,6 +42,8 @@ public class FileService {
         }
         var reader = readers.get(extension);
         var users = reader.readUsers(file);
+
+//        userService.saveAll(users);
 
         log.info("'readUsers' returned - {}", users);
 

@@ -47,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 import static com.sendgrid.Method.POST;
 import static com.ty_yak.auth.model.enums.BusinessLogicException.*;
@@ -440,6 +441,10 @@ public class UserService {
         log.info("'uploadAvatar' returned - {}", url);
 
         return url;
+    }
+
+    public List<User> saveAll(List<User> users) {
+        return userRepository.saveAll(users);
     }
 
     private int generateCode() {

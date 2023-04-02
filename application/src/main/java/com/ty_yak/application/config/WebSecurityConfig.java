@@ -1,13 +1,13 @@
-package com.ty_yak.auth.config;
+package com.ty_yak.application.config;
 
 import com.google.common.collect.ImmutableList;
+import com.ty_yak.auth.config.JwtAuthenticationFilter;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -15,9 +15,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.reactive.config.CorsRegistry;
-
-import java.util.Arrays;
 
 import static com.google.api.client.http.HttpMethods.*;
 import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
@@ -60,9 +57,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(POST, "/api/v1/code/generate").hasRole("USER")
                 .antMatchers(POST, "/api/v1/logout").hasRole("USER")
                 // ExportController
-                .antMatchers(POST, "/api/reports/v1/export").permitAll()
-//                .hasRole("ADMIN")
-
+                .antMatchers(POST, "/api/reports/v1/export").hasRole("ADMIN")
+                // ReportController
+                .antMatchers(GET, "/api/reports/v1").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -85,7 +82,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         configuration.setAllowCredentials(true);
         // setAllowedHeaders is important! Without it, OPTIONS preflight request
         // will fail with 403 Invalid CORS request
-        configuration.setAllowedHeaders(ImmutableList.of("Authorization", "Cache-Control", "Content-Type"));
+        configuration.setAllowedHeaders(ImmutableList.of("Cache-Control", "Content-Type"));
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

@@ -42,11 +42,11 @@ public class ExcelFileWriter extends FileWriter {
             sheet.getRow(0).createCell(i).setCellValue(headers.get(i));
         }
 
-        for (int i = 1; i < data.size(); i++) {
-            sheet.createRow(i);
+        for (int i = 0; i < data.size(); i++) {
+            sheet.createRow(i + 1);
             var row = data.get(i).getExportRow();
             for (int j = 0; j < headers.size(); j++) {
-                sheet.getRow(i).createCell(j).setCellValue(row.get(j).toString());
+                sheet.getRow(i + 1).createCell(j).setCellValue(row.get(j).toString());
             }
         }
 
