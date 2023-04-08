@@ -1,6 +1,5 @@
 package com.ty_yak.auth.controller;
 
-import com.ty_yak.auth.model.dto.login.ConfirmChangePasswordCodeDto;
 import com.ty_yak.auth.model.dto.login.ConfirmationCodeDto;
 import com.ty_yak.auth.model.dto.registration.ChangePasswordDto;
 import com.ty_yak.auth.model.dto.registration.RegistrationByGoogleDto;
@@ -19,13 +18,10 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.List;
 
@@ -78,43 +74,31 @@ public class UserController {
         return jwtDto;
     }
 
-    @PutMapping("/password/recovery")
+    @PutMapping("/v1/password/change")
     @Operation(summary = "Change password")
-    public JwtDto recoverPassword(@RequestBody @Valid ChangePasswordDto changePasswordDto) {
+    public ResponseEntity<?> changePassword(@AuthenticationPrincipal Long userId,
+                                            @RequestBody @Valid ChangePasswordDto changePasswordDto) {
 
-        log.info("User with id - {} try to recover password", changePasswordDto.getUserId());
+        log.info("User with id - {} try to change password", userId);
 
-        var jwtDto = userService.recoverPassword(changePasswordDto);
+        userService.changePassword(userId, changePasswordDto);
+
+        log.info("User changed password successfully.");
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/v1/password/recovery")
+    @Operation(summary = "Change password")
+    public ResponseEntity<?> recoverPassword(@RequestParam String email) {
+
+        log.info("User with email - {} try to recover password", email);
+
+        userService.recoverPassword(email);
 
         log.info("User recover password successfully.");
 
-        return jwtDto;
-    }
-
-    @PostMapping("/v1/password-code/confirm")
-    @Operation(summary = "Confirm change password code")
-    public boolean confirmChangePasswordCode(@RequestBody @Valid ConfirmChangePasswordCodeDto confirmCodeDto) {
-
-        log.info("User try to confirm code.");
-
-        var confirmation = userService.confirmPasswordCode(confirmCodeDto);
-
-        log.info("User confirmed code with - {}", confirmation);
-
-        return confirmation;
-    }
-
-    @PostMapping("/v1/email-code/generate")
-    @Operation(summary = "Send confirmation code to email")
-    public SendGridResponseDto createConfirmationCode(@RequestBody @Valid ConfirmationCodeDto confirmationCodeDto) {
-
-        log.info("User are trying to create confirmation code with params - {}", confirmationCodeDto);
-
-        var sendGridResponse = userService.createConfirmationCode(confirmationCodeDto);
-
-        log.info("SendGrid returned - {}", sendGridResponse);
-
-        return sendGridResponse;
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/v1/email-code/confirm")

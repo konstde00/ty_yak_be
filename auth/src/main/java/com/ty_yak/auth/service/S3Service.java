@@ -13,6 +13,7 @@ import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class S3Service {
 
     AmazonS3 s3Client;
 
-    public S3Service(AmazonS3 s3Client) {
+    public S3Service(@Qualifier("getCredentials") AmazonS3 s3Client) {
         this.s3Client = s3Client;
     }
 

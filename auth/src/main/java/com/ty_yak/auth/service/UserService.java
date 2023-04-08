@@ -47,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.sendgrid.Method.POST;
@@ -70,10 +71,21 @@ public class UserService {
     UserMapper userMapper;
     FileService fileService;
     TokenService tokenService;
+    EmailService emailService;
     GoogleService googleService;
     UserRepository userRepository;
     DeviceTokenRepository deviceTokenRepository;
     ConfirmationCodeRepository confirmationCodeRepository;
+
+    public void validateEmails(List<String> emails) {
+        emails.forEach(this::validateEmail);
+    }
+
+    private void validateEmail(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new AlreadyExistException("User with email - " + email + " already exists");
+        }
+    }
 
     public User getById(Long id) {
 
@@ -227,24 +239,44 @@ public class UserService {
 
     @SneakyThrows
     @Transactional
-    public JwtDto recoverPassword(ChangePasswordDto changePasswordDto) {
+    public void recoverPassword(String email) {
 
-        log.info("'changePassword' invoked for user with id - {}", changePasswordDto.getUserId());
+        checkEmail(email);
 
-        LoginService.validatePassword(changePasswordDto.getNewPassword());
+        var user = getByEmail(email);
 
-        var user = validateAndGetUserForChangePassword(changePasswordDto.getUserId(), changePasswordDto.getCode());
+        ConfirmationCode code = generateConfirmationCode(user);
+        confirmationCodeRepository.save(code);
 
-        var hashedPassword = bcryptPassword(changePasswordDto.getNewPassword());
+        emailService.sendRecoveryCode(email, code.getCode());
+    }
 
-        user.setPassword(hashedPassword);
+    private void checkEmail(String email) {
+        if (!userRepository.existsByEmail(email)) {
+            throw new NotValidException(INCORRECT_EMAIL_OR_PASSWORD.name());
+        }
+    }
 
-        var refreshToken = tokenService.generateRefreshToken(user);
-        var jwtDto = tokenService.getAccessAndRefreshTokens(user, refreshToken);
+    private ConfirmationCode generateConfirmationCode(User user) {
+        return ConfirmationCode.builder()
+                .user(user)
+                .code(generateCode())
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    @Transactional
+    public void changePassword(Long userId, ChangePasswordDto changePasswordDto) {
+
+        log.info("'changePassword' invoked with params - {} and user id - {}", changePasswordDto, userId);
+
+        var user = getById(userId);
+
+        validateUserRegistrationType(user, EMAIL_AND_PASSWORD, WRONG_AUTHORIZATION_TYPE_FOR_PASSWORD_RECOVERING);
+
+        user.setPassword(bcryptPassword(changePasswordDto.getNewPassword()));
 
         log.info("'changePassword' returned 'Success'");
-
-        return jwtDto;
     }
 
     @Transactional
@@ -262,20 +294,6 @@ public class UserService {
 
         // actually delete user
         userRepository.deleteUserById(user.getId());
-    }
-
-    public void sendMailWithPasswordToUserEmail(String email, String password, long userId) throws IOException {
-
-        log.info("'sendMailWithPasswordToUserEmail' invoked with email - {}", email);
-
-        var mail = generateInfo(email, password);
-        var request = generateRequest(mail);
-        var response = sendGrid.api(request);
-
-        var sendGridResponseDto = userMapper
-                .toSendGridResponse(response, userId);
-
-        log.info("'sendMailWithPasswordToUserEmail' returned - {}", sendGridResponseDto);
     }
 
     public Mail generateInfo(String email, String password) {
@@ -322,22 +340,6 @@ public class UserService {
         var refreshToken = tokenService.generateRefreshToken(user);
 
         return tokenService.getAccessAndRefreshTokens(user, refreshToken);
-    }
-
-    private User validateAndGetUserForChangePassword(Long userId, int code) {
-
-        log.info("'validateAndGetUserForChangePassword' invoked for user with id - {}", userId);
-
-        var confirmationCode = confirmationCodeRepository.findByIdAndConfirmationCode(userId, code)
-                .orElseThrow(() -> {
-                    var message = "User with such id and code is not found.";
-                    log.warn(message);
-                    return new ResourceNotFoundException(message);
-                });
-
-        log.info("'validateAndGetUserForChangePassword' returned - {}", confirmationCode);
-
-        return confirmationCode.getUser();
     }
 
     @SneakyThrows
@@ -400,27 +402,6 @@ public class UserService {
         }
 
         log.info("'confirmEmailCode' returned - {}", true);
-
-        return true;
-    }
-
-    @Transactional(readOnly = true)
-    public boolean confirmPasswordCode(ConfirmChangePasswordCodeDto confirmPasswordCodeDto) {
-
-        log.info("'confirmPasswordCode' invoked");
-
-        var confirmationCode = confirmationCodeRepository.findByIdAndConfirmationCode(confirmPasswordCodeDto.getUserId(), confirmPasswordCodeDto.getCode())
-                .orElseThrow(() -> {
-                    log.error("Wrong code.");
-                    return new ResourceNotFoundException(INCORRECT_CONFIRM_CODE.name());
-                });
-
-        if (confirmationCode.getExpiredAt().isBefore(DateUtil.getLocalDateTimeNow())) {
-            log.error("Your code has expired.");
-            throw new ExpiredException(CODE_EXPIRED.name());
-        }
-
-        log.info("'confirmPasswordCode' returned - {}", true);
 
         return true;
     }

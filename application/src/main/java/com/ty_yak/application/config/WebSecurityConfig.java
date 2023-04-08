@@ -41,7 +41,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // UserController
                 .antMatchers(POST, "/api/users/v1/registration/**").permitAll()
                 .antMatchers(POST, "api/users/v1/check/username").permitAll()
-                .antMatchers(PUT, "api/users/v1/password/recovery").hasRole("USER")
+                .antMatchers(PUT, "api/users/v1/password/recovery").permitAll()
                 .antMatchers(POST, "api/users/v1/password-code/confirm").hasRole("USER")
                 .antMatchers(POST, "api/users/v1/email-code/generate").hasRole("USER")
                 .antMatchers(POST, "api/users/v1/email-code/confirm").hasRole("USER")

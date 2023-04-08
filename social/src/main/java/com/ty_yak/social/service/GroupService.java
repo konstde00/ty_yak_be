@@ -7,7 +7,12 @@ import com.ty_yak.social.repository.GroupRepository;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -15,6 +20,11 @@ import org.springframework.stereotype.Service;
 public class GroupService {
 
     GroupRepository groupRepository;
+
+    public List<String> getEmailsByUserId(Long userId) {
+        return Objects.requireNonNullElse(groupRepository
+                .getEmailsByUserId(userId), Collections.emptyList());
+    }
 
     public void updateGroup(UpdateGroupDto updateGroupDto) {
 

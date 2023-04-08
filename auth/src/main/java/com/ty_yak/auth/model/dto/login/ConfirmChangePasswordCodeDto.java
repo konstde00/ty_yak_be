@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 public class ConfirmChangePasswordCodeDto {
 
     @NotNull
-    private Long userId;
+    private String email;
 
     @NotNull
     private Integer code;
