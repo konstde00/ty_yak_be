@@ -1,8 +1,6 @@
 package com.ty_yak.auth.service;
 
-import com.sendgrid.Method;
 import com.sendgrid.Request;
-import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
@@ -12,14 +10,12 @@ import com.ty_yak.auth.exception.ExpiredException;
 import com.ty_yak.auth.exception.NotValidException;
 import com.ty_yak.auth.exception.ResourceNotFoundException;
 import com.ty_yak.auth.mapper.UserMapper;
-import com.ty_yak.auth.model.dto.login.ConfirmChangePasswordCodeDto;
+import com.ty_yak.auth.model.dto.login.PasswordRecoveryDto;
 import com.ty_yak.auth.model.dto.registration.ChangePasswordDto;
 import com.ty_yak.auth.model.dto.registration.RegistrationByGoogleDto;
 import com.ty_yak.auth.model.dto.user.CheckUsernameDto;
 import com.ty_yak.auth.model.dto.login.JwtDto;
-import com.ty_yak.auth.model.dto.login.ConfirmationCodeDto;
 import com.ty_yak.auth.model.dto.registration.RegistrationByEmailDto;
-import com.ty_yak.auth.model.dto.user.SendGridResponseDto;
 import com.ty_yak.auth.model.dto.user.UserDto;
 import com.ty_yak.auth.model.entity.ConfirmationCode;
 import com.ty_yak.auth.model.entity.User;
@@ -49,6 +45,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.sendgrid.Method.POST;
 import static com.ty_yak.auth.model.enums.BusinessLogicException.*;
@@ -100,7 +97,7 @@ public class UserService {
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     log.error(format("User with email - %s does not exist. ", email));
-                    return new ResourceNotFoundException(INCORRECT_EMAIL_OR_PASSWORD.name());
+                    return new ResourceNotFoundException(format("User with email - %s does not exist. ", email));
                 });
 
         log.info("'getByEmail' returned 'Success'");
@@ -239,21 +236,21 @@ public class UserService {
 
     @SneakyThrows
     @Transactional
-    public void recoverPassword(String email) {
+    public void recoverPassword(PasswordRecoveryDto passwordRecoveryDto) {
 
-        checkEmail(email);
+        checkEmail(passwordRecoveryDto.getEmail());
 
-        var user = getByEmail(email);
+        var user = getByEmail(passwordRecoveryDto.getEmail());
 
         ConfirmationCode code = generateConfirmationCode(user);
         confirmationCodeRepository.save(code);
 
-        emailService.sendRecoveryCode(email, code.getCode());
+        emailService.sendRecoveryCode(passwordRecoveryDto.getEmail(), code.getCode());
     }
 
     private void checkEmail(String email) {
         if (!userRepository.existsByEmail(email)) {
-            throw new NotValidException(INCORRECT_EMAIL_OR_PASSWORD.name());
+            throw new NotValidException("User with email `" + email + "` does not exist");
         }
     }
 
@@ -261,18 +258,16 @@ public class UserService {
         return ConfirmationCode.builder()
                 .user(user)
                 .code(generateCode())
-                .createdAt(LocalDateTime.now())
+                .expiredAt(LocalDateTime.now().plusHours(2))
                 .build();
     }
 
     @Transactional
-    public void changePassword(Long userId, ChangePasswordDto changePasswordDto) {
+    public void changePassword(ChangePasswordDto changePasswordDto) {
 
-        log.info("'changePassword' invoked with params - {} and user id - {}", changePasswordDto, userId);
+        var user = getByEmail(changePasswordDto.getEmail());
 
-        var user = getById(userId);
-
-        validateUserRegistrationType(user, EMAIL_AND_PASSWORD, WRONG_AUTHORIZATION_TYPE_FOR_PASSWORD_RECOVERING);
+        LoginService.validatePassword(changePasswordDto.getNewPassword());
 
         user.setPassword(bcryptPassword(changePasswordDto.getNewPassword()));
 
@@ -296,45 +291,6 @@ public class UserService {
         userRepository.deleteUserById(user.getId());
     }
 
-    public Mail generateInfo(String email, String password) {
-
-        log.info("'generateInfo' invoked with email - {} and subject - Confirm email", email);
-
-        var from = new Email(sendGridSender);
-        var to = new Email(email);
-
-        var content = new Content("text/html", "Please, provide this password to confirm your email: " + password);
-
-        log.info("'generateInfo' returned 'Success'");
-
-        return new Mail(from, "Confirm email", to, content);
-    }
-
-    private Mail generateInfo(String email, String subject, String value, int code) {
-
-        log.info("'generateInfo' invoked with email - {} and subject - {}", email, subject);
-
-        var from = new Email(sendGridSender);
-        var to = new Email(email);
-
-        var content = new Content("text/html", value + code);
-
-        log.info("'generateInfo' returned 'Success'");
-
-        return new Mail(from, subject, to, content);
-    }
-
-    @SneakyThrows(IOException.class)
-    private Request generateRequest(Mail mail) {
-
-        var request = new Request();
-        request.setMethod(POST);
-        request.setEndpoint("mail/send");
-        request.setBody(mail.build());
-
-        return request;
-    }
-
     public JwtDto generateTokens(User user) {
 
         var refreshToken = tokenService.generateRefreshToken(user);
@@ -342,68 +298,32 @@ public class UserService {
         return tokenService.getAccessAndRefreshTokens(user, refreshToken);
     }
 
-    @SneakyThrows
     @Transactional
-    public SendGridResponseDto createConfirmationCode(ConfirmationCodeDto confirmationCodeDto) {
-
-        log.info("'createChangePasswordCode' invoked with params - {}", confirmationCodeDto);
-
-        var email = confirmationCodeDto.getEmail();
-        var confirmationCode = confirmationCodeRepository
-                .findByEmailAndCode(email, confirmationCodeDto.getCode());
-
-        var code = generateCode();
-        var user = userRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    var message = "User with such email is not found.";
-                    log.warn(message);
-                    return new ResourceNotFoundException(message);
-                });
-
-        if (confirmationCode.isPresent()) {
-
-            confirmationCode.get().setCode(code);
-            confirmationCode.get().setExpiredAt(DateUtil.getLocalDateTimeNow().plusMinutes(30L));
-
-        } else {
-            confirmationCodeRepository.save(ConfirmationCode
-                    .builder()
-                    .code(code)
-                    .user(user)
-                    .expiredAt(DateUtil.getLocalDateTimeNow().plusHours(2))
-                    .build());
-        }
-
-        var mail = generateInfo(email, "Confirm email", "Please, provide this code to confirm your email: ", code);
-        var request = generateRequest(mail);
-        var response = sendGrid.api(request);
-
-        var sendGridResponseDto = userMapper.toSendGridResponse(response, null);
-
-        log.info("'createChangePasswordCode' returned - {}", sendGridResponseDto);
-
-        return sendGridResponseDto;
-    }
-
-    @Transactional(readOnly = true)
-    public boolean confirmEmailCode(String email, int code) {
+    public JwtDto confirmEmailCode(String email, int code) {
 
         log.info("'confirmEmailCode' invoked with email - {}", email);
 
-        var userCode = confirmationCodeRepository.findByEmailAndCode(email, code)
-                .orElseThrow(() -> {
-                    log.error("Wrong code.");
-                    return new ResourceNotFoundException(INCORRECT_CONFIRM_CODE.name());
-                });
+        var userCodes = confirmationCodeRepository.findAllByEmailAndCode(email, code)
+                .stream()
+                .filter(uc -> uc.getCode().equals(code))
+                .toList();
 
-        if (userCode.getExpiredAt().isBefore(DateUtil.getLocalDateTimeNow())) {
-            log.error("Your code has expired.");
-            throw new ExpiredException(CODE_EXPIRED.name());
+        if (userCodes.isEmpty()) {
+
+            throw  new ResourceNotFoundException("Incorrect confirmation code");
         }
+
+        userCodes.stream()
+                .filter(uc -> {
+                    log.info("uc.getExpiredAt() - {}", uc.getExpiredAt());
+                    return uc.getExpiredAt().isAfter(DateUtil.getLocalDateTimeNow());
+                })
+                .findAny()
+                .orElseThrow(() -> new ExpiredException("Your code has expired"));
 
         log.info("'confirmEmailCode' returned - {}", true);
 
-        return true;
+        return generateTokens(userCodes.get(0).getUser());
     }
 
     @Transactional
@@ -435,8 +355,8 @@ public class UserService {
     private void checkEmailDuplication(String email) {
 
         if (userRepository.existsByEmail(email)) {
-            log.error(format("User with email %s already exist. ", email));
-            throw new AlreadyExistException(EMAIL_ALREADY_EXISTS.name());
+            log.error(format("User with email %s already exists. ", email));
+            throw new AlreadyExistException(format("User with email %s already exists. ", email));
         }
     }
 

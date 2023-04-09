@@ -15,10 +15,17 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         return new RestTemplate();
     }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedMethods("HEAD", "GET", "PUT", "POST", "DELETE", "PATCH");
-    }
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")
+//                .allowedOrigins("*")
+//                .allowedMethods("*");
+//    }
+//
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")
+//                .allowedOrigins("*")
+//                .allowedMethods("HEAD", "GET", "PUT", "POST", "DELETE", "PATCH");
+//    }
 }

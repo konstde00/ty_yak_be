@@ -1,6 +1,9 @@
 package com.ty_yak.auth.controller;
 
+import com.google.gson.Gson;
 import com.ty_yak.auth.model.dto.login.ConfirmationCodeDto;
+import com.ty_yak.auth.model.dto.login.PasswordRecoveryDto;
+import com.ty_yak.auth.model.dto.login.SimpleResponse;
 import com.ty_yak.auth.model.dto.registration.ChangePasswordDto;
 import com.ty_yak.auth.model.dto.registration.RegistrationByGoogleDto;
 import com.ty_yak.auth.model.dto.user.*;
@@ -76,12 +79,11 @@ public class UserController {
 
     @PutMapping("/v1/password/change")
     @Operation(summary = "Change password")
-    public ResponseEntity<?> changePassword(@AuthenticationPrincipal Long userId,
-                                            @RequestBody @Valid ChangePasswordDto changePasswordDto) {
+    public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordDto changePasswordDto) {
 
-        log.info("User with id - {} try to change password", userId);
+        log.info("User with tries to change password");
 
-        userService.changePassword(userId, changePasswordDto);
+        userService.changePassword(changePasswordDto);
 
         log.info("User changed password successfully.");
 
@@ -90,29 +92,28 @@ public class UserController {
 
     @PutMapping("/v1/password/recovery")
     @Operation(summary = "Change password")
-    public ResponseEntity<?> recoverPassword(@RequestParam String email) {
+    public ResponseEntity<SimpleResponse> recoverPassword(@RequestBody PasswordRecoveryDto passwordRecoveryDto) {
 
-        log.info("User with email - {} try to recover password", email);
+        log.info("User with email - {} tries to recover password", passwordRecoveryDto);
 
-        userService.recoverPassword(email);
+        userService.recoverPassword(passwordRecoveryDto);
 
         log.info("User recover password successfully.");
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(new SimpleResponse("Recovery code has been sent successfully"), HttpStatus.OK);
     }
 
     @PostMapping("/v1/email-code/confirm")
     @Operation(summary = "Confirm email confirmation code")
-    public boolean confirmEmailCode(@RequestBody @Valid ConfirmationCodeDto confirmCodeDto) {
+    public ResponseEntity<JwtDto> confirmEmailCode(@RequestBody @Valid ConfirmationCodeDto confirmCodeDto) {
 
         log.info("User tries to confirm email code.");
 
-        var confirmation
-                = userService.confirmEmailCode(confirmCodeDto.getEmail(), confirmCodeDto.getCode());
+        var jwtDto = userService.confirmEmailCode(confirmCodeDto.getEmail(), confirmCodeDto.getCode());
 
-        log.info("User confirmed code with - {}", confirmation);
+        log.info("User confirmed code with - {}", jwtDto);
 
-        return confirmation;
+        return new ResponseEntity<>(jwtDto, HttpStatus.OK);
     }
 
     @GetMapping("/v1/info")

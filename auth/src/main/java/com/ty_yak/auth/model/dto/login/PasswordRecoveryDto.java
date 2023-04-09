@@ -1,4 +1,4 @@
-package com.ty_yak.auth.model.dto.registration;
+package com.ty_yak.auth.model.dto.login;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,22 +7,14 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 import static lombok.AccessLevel.PRIVATE;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = PRIVATE)
-public class ChangePasswordDto {
-
-    @NotNull
+public class PasswordRecoveryDto {
     String email;
-
-    @NotBlank
-    String newPassword;
-
-    int code;
 }

@@ -29,7 +29,7 @@ public class LoginController {
     @Operation(summary = "User login by email")
     public JwtDto loginByEmail(@RequestBody @Valid LoginByEmailDto loginDto) {
 
-        log.info("User try to login with email - {}", loginDto.getEmail());
+        log.info("User tries to login with email - {}", loginDto.getEmail());
 
         var jwtDto = loginService.authorizationByEmailAndPassword(loginDto);
 
@@ -62,20 +62,6 @@ public class LoginController {
         log.info("User successfully refresh token");
 
         return jwtDto;
-    }
-
-
-    @PostMapping("/v1/code/generate")
-    @Operation(summary = "Send confirmation code to email")
-    public SendGridResponseDto createConfirmationCode(@RequestBody @Valid ConfirmationCodeDto confirmationCodeDto) {
-
-        log.info("User are trying to create confirmation code with params - {}", confirmationCodeDto);
-
-        var sendGridResponse = loginService.generateConfirmationCode(confirmationCodeDto);
-
-        log.info("SendGrid returned - {}", sendGridResponse);
-
-        return sendGridResponse;
     }
 
     @PostMapping("/v1/logout")

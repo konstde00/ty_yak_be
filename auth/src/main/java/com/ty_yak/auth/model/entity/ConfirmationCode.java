@@ -36,7 +36,6 @@ public class ConfirmationCode {
     @Column(name = "created_at")
     LocalDateTime createdAt;
 
-    @UpdateTimestamp
     @Column(name = "expired_at")
     LocalDateTime expiredAt;
 }

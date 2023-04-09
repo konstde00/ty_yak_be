@@ -66,24 +66,6 @@ public class LoginService {
         return jwtDto;
     }
 
-    public SendGridResponseDto generateConfirmationCode(ConfirmationCodeDto confirmationCodeDto) {
-
-        log.info("'generateConfirmationCode' invoked with params - {}", confirmationCodeDto);
-        var sendgridResponse = userService.createConfirmationCode(confirmationCodeDto);
-        log.info("'generateConfirmationCode' returned - {}", sendgridResponse);
-
-        return sendgridResponse;
-    }
-
-    public boolean confirmEmailCode(ConfirmationCodeDto confirmationCodeDto) {
-
-        log.info("'confirmEmailCode' invoked with params - {}", confirmationCodeDto);
-        var confirmation = userService.confirmEmailCode(confirmationCodeDto.getEmail(), confirmationCodeDto.getCode());
-        log.info("'confirmEmailCode' returned - {}", confirmation);
-
-        return confirmation;
-    }
-
     public void logout(Long userId, RefreshTokenDto refreshTokenDto) {
 
         log.info("'logout' invoked for user with id - {}", userId);
@@ -95,8 +77,9 @@ public class LoginService {
 
     public static void validatePassword(String password){
         if(password.length() < 4 || password.length() > 25){
-            log.warn("Password length is not valid - "+password.length());
-            throw new NotValidException(NOT_VALID_PASSWORD.name());
+            log.warn("Password length is not valid: "+password.length());
+            throw new NotValidException(String.format("Password length is not valid, has to be between 4 and 25 symbols. " +
+                    "Current length is %d", password.length()));
         }
     }
 

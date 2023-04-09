@@ -1,7 +1,6 @@
 package com.ty_yak.application.config;
 
-import com.ty_yak.auth.exception.ErrorDetails;
-import com.ty_yak.auth.exception.NotValidException;
+import com.ty_yak.auth.exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +22,27 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         ErrorDetails errorDetails = buildErrorDetails(ex.getMessage(), request.getDescription(false));
         log.error("Bad request", ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
+    }
+
+    @ExceptionHandler({ResourceNotFoundException.class})
+    public final ResponseEntity<ErrorDetails> handleAllExceptions(ResourceNotFoundException ex, WebRequest request) {
+        ErrorDetails errorDetails = buildErrorDetails(ex.getMessage(), request.getDescription(false));
+        log.error("Bad request", ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
+    }
+
+    @ExceptionHandler({AlreadyExistException.class})
+    public final ResponseEntity<ErrorDetails> handleAllExceptions(AlreadyExistException ex, WebRequest request) {
+        ErrorDetails errorDetails = buildErrorDetails(ex.getMessage(), request.getDescription(false));
+        log.error("Bad request", ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
+    }
+
+    @ExceptionHandler({ExpiredException.class})
+    public final ResponseEntity<ErrorDetails> handleAllExceptions(ExpiredException ex, WebRequest request) {
+        ErrorDetails errorDetails = buildErrorDetails(ex.getMessage(), request.getDescription(false));
+        log.error("Bad request", ex);
+        return ResponseEntity.status(HttpStatus.GONE).body(errorDetails);
     }
 
     private static ErrorDetails buildErrorDetails(String message, String details) {

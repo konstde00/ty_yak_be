@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ty_yak.auth.model.enums.CountryCode;
 import com.ty_yak.auth.model.enums.Role;
 import com.ty_yak.auth.model.enums.UserRegistrationType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
@@ -71,6 +68,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     Collection<DeviceToken> deviceTokens;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "user")
     Collection<ConfirmationCode> confirmationCodes;
 

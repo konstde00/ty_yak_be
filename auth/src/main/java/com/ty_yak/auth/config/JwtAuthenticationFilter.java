@@ -32,14 +32,12 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws IOException, ServletException {
-
         var authentication = parseToken(request);
 
         if (authentication != null)
             SecurityContextHolder.getContext().setAuthentication(authentication);
         else
             SecurityContextHolder.clearContext();
-
         filterChain.doFilter(request, response);
     }
 
@@ -67,7 +65,10 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
                 return new UsernamePasswordAuthenticationToken(userId, null, authorities);
 
-            } catch (Exception ignored) {}
+            } catch (Exception exception) {
+
+                log.error("Error while parsing token", exception);
+            }
         }
 
         return null;

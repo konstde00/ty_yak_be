@@ -39,16 +39,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 // UserController
+                .antMatchers("/api/**").permitAll()
+                /*
+                .antMatchers("api/users/v1/password/recovery").permitAll()
                 .antMatchers(POST, "/api/users/v1/registration/**").permitAll()
-                .antMatchers(POST, "api/users/v1/check/username").permitAll()
-                .antMatchers(PUT, "api/users/v1/password/recovery").permitAll()
-                .antMatchers(POST, "api/users/v1/password-code/confirm").hasRole("USER")
-                .antMatchers(POST, "api/users/v1/email-code/generate").hasRole("USER")
-                .antMatchers(POST, "api/users/v1/email-code/confirm").hasRole("USER")
-                .antMatchers(GET, "api/users/v1/info").hasRole("USER")
-                .antMatchers(POST, "api/users/v1/avatar").hasRole("USER")
-                .antMatchers(PUT, "api/users/v1/device-token").hasRole("USER")
-                .antMatchers(PUT, "api/users/v1/device-token/reset").hasRole("USER")
+                .antMatchers(POST, "/api/users/v1/check/username").permitAll()
+                .antMatchers(POST, "/api/users/v1/password-code/confirm").hasRole("USER")
+                .antMatchers(POST, "/api/users/v1/email-code/generate").hasRole("USER")
+                .antMatchers(POST, "/api/users/v1/email-code/confirm").hasRole("USER")
+                .antMatchers(GET, "/api/users/v1/info").hasRole("USER")
+                .antMatchers(POST, "/api/users/v1/avatar").hasRole("USER")
+                .antMatchers(PUT, "/api/users/v1/device-token").hasRole("USER")
+                .antMatchers(PUT, "/api/users/v1/device-token/reset").hasRole("USER")
                 .antMatchers( "/api/users/v1/upload").permitAll()
                 .antMatchers(DELETE, "api/users/v1").hasRole("USER")
                 // LoginController
@@ -56,10 +58,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(POST, "/api/v1/token/refresh").hasRole("USER")
                 .antMatchers(POST, "/api/v1/code/generate").hasRole("USER")
                 .antMatchers(POST, "/api/v1/logout").hasRole("USER")
-                // ExportController
-                .antMatchers(POST, "/api/reports/v1/export").hasRole("ADMIN")
                 // ReportController
-                .antMatchers(GET, "/api/reports/v1").permitAll()
+                .antMatchers(GET, "/api/reports/v1/**").permitAll()
+                 */
                 .anyRequest()
                 .authenticated()
                 .and()
