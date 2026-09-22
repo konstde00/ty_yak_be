@@ -6,7 +6,9 @@ them answers. "Ти як?" is Ukrainian for "how are you".
 
 The web client is [ty_yak_fe](https://github.com/konstde00/ty_yak_fe).
 
-![Check-in screen of the web client: I'm fine, Okay for now, I need help](docs/client-check-in.png)
+| Home | Compose | Following |
+|---|---|---|
+| ![Home: Все добре, Я в порядку, Погано](docs/client-main.png) | ![Compose and send](docs/client-compose.png) | ![Following](docs/client-following.png) |
 
 ## How a check-in runs
 
