@@ -6,7 +6,7 @@ them answers. "Ти як?" is Ukrainian for "how are you".
 
 The web client is [ty_yak_fe](https://github.com/konstde00/ty_yak_fe).
 
-![Sign-in screen of the web client](docs/client-login.png)
+![Check-in screen of the web client: I'm fine, Okay for now, I need help](docs/client-check-in.png)
 
 ## How a check-in runs
 
